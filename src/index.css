@@ -1,9 +1,131 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
+@import "@splidejs/react-splide/css";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@theme {
+  --color-brand-red: #fc4747;
+  --color-brand-midnight: #161d2f;
+}
+
+@theme {
+  --breakpoint-smallmobile: 400px;
+  --breakpoint-mobile: 800px;
+  --breakpoint-tablet: 940px;
+  --breakpoint-smallLT: 1070px;
+  --breakpoint-laptop: 1220px;
+  --breakpoint-desktop: 1360px;
+  --breakpoint-xl: 1515px;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Outfit", sans-serif;
+}
+
+body {
+  background-color: #10141e;
+}
+
+.bxs-star {
+  color: rgb(255, 213, 0);
+}
+
+/* .bxs-bookmark {
+  color: #bfbfbf;
+  font-size: 24px;
+} */
+
+.splide {
+  height: fit-content;
+}
+
+.splide__pagination {
+  counter-reset: pagination-num;
+  position: static !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  gap: 3px;
+  /* 
+  color: #14141480;
+  color: #e8f0fe80; */
+
+  /* text-[#141414] bg-[#e8f0fe] */
+}
+
+.currently-trending-slider .splide__pagination__page:before {
+  content: "";
+}
+
+.currently-trending-slider .splide__pagination__page {
+  width: 10px;
+  height: 10px;
+}
+
+.currently-trending-slider .splide__pagination {
+  margin: 0;
+  gap: 1px;
+}
+
+.splide__pagination__page {
+  width: 30px;
+  height: 30px;
+  border-radius: none;
+}
+
+.splide__pagination__page.is-active {
+  background-color: #fc4747;
+}
+
+.splide__pagination__page:before {
+  counter-increment: pagination-num;
+  content: counter(pagination-num);
+}
+
+/* .splide__arrows splide__arrows--ltr {
+  position: static !important;
+}
+
+.splide__arrow splide__arrow--prev {
+  position: static !important;
+}
+
+.splide__arrow splide__arrow--next {
+  position: static !important;
+} */
+
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition:
+    opacity 0.75s,
+    visibility 0.75s;
+  z-index: 5;
+}
+
+.loader::after {
+  content: "";
+  width: 60px;
+  height: 60px;
+  border: 10px solid #dddddd;
+  border-top-color: #fc4747;
+
+  border-radius: 50%;
+  animation: loading 0.75s ease infinite;
+}
+
+@keyframes loading {
+  from {
+    transform: rotate(0turn);
+  }
+  to {
+    transform: rotate(1turn);
+  }
 }
