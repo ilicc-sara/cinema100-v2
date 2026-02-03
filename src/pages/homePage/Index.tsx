@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase-client";
-import useGenres from "./customHooks/useGenres";
 import useFindGenre from "./customHooks/useFindGenre";
 import TrendingMovies from "./components/TrendingMovies";
 import Movies from "./components/Movies";
@@ -11,6 +10,7 @@ import Button from "../../UI/Button";
 import { useNavigate } from "react-router";
 import { UserAuth } from "../../context/AuthContext";
 import type { singleMovie } from "../../types";
+import type { Genres } from "../../types";
 
 function Home() {
   const [activeMovies, setActiveMovies] = useState<singleMovie[] | null>(null);
@@ -24,7 +24,10 @@ function Home() {
   const [currentlyTrending, setCurrentlyTrending] = useState<singleMovie[] | null>(null);
   const [trendingError, setTrendingError] = useState<string | null>(null);
 
-  const { genres, fetchGenres } = useGenres();
+  // const { genres, fetchGenres } = useGenres();
+  const [genres, setGenres] = useState<Genres[] | null>(null);
+  const [genresError, setGenresError] = useState<string | null>(null);
+
   const [activeSlide, setActiveSlide] = useState<number>(1);
   const [activeGenre, setActiveGenre] = useState<string>("all");
 
@@ -51,7 +54,6 @@ function Home() {
       if (error) throw error;
 
       setActiveMovies(data);
-      setBookmarked(false);
     } catch (err) {
       console.error(err);
       setError("Failed to load slide movies");
@@ -95,6 +97,18 @@ function Home() {
     }
   };
 
+  const fetchGenres = async () => {
+    setGenresError(null);
+    try {
+      const { data, error } = await supabase.from("genres").select();
+      if (error) throw error;
+      setGenres(data);
+    } catch (err) {
+      console.error(err);
+      setGenresError("Failed to load genres");
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("sb-yyocycmzxqjdvkwqlpzd-auth-token");
     if (token) {
@@ -123,7 +137,6 @@ function Home() {
   useEffect(() => {
     selectActiveSlideMovies((activeSlide - 1) * 12, activeSlide * 12 - 1);
     setSearch("");
-    setBookmarked(false);
   }, [activeSlide, selectActiveSlideMovies]);
 
   // FINDING MOVIES ACCORDING TO SELECTED GENRE OR ELSE (if activated "all") RETURNING TO SLIDE 1
@@ -134,7 +147,6 @@ function Home() {
       selectActiveSlideMovies((activeSlide - 1) * 12, activeSlide * 12 - 1);
       setSearch("");
     }
-    setBookmarked(false);
   }, [activeGenre]);
 
   const handleSumbit = async (e: any) => {
@@ -245,21 +257,16 @@ function Home() {
               style={{ color: `${bookmarked ? "#fc4747" : "#bfbfbf"}` }}
               onClick={() => showBookmarkedMovies(userId ? userId : "")}
             ></i>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill={`${bookmarked ? "#bfbfbf" : "#fc4747"}`}
-              width="28"
-              height="28"
+            <i
+              className={`bxr bxs-home text-[24px]`}
+              style={{ color: `${bookmarked ? "#bfbfbf" : "#fc4747"}` }}
               onClick={() =>
                 selectActiveSlideMovies(
                   (activeSlide - 1) * 12,
                   activeSlide * 12 - 1,
                 )
               }
-            >
-              <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z"></path>
-              <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z"></path>
-            </svg>
+            ></i>
           </div>
         </div>
         <div className="flex w-[80%] !mx-auto !my-5 relative justify-between items-center">
