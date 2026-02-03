@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase-client";
-import useCountData from "./customHooks/useCountData";
-import useTrendingData from "./customHooks/useTrendingData";
 import useGenres from "./customHooks/useGenres";
 import useFindGenre from "./customHooks/useFindGenre";
 import TrendingMovies from "./components/TrendingMovies";
@@ -15,15 +13,17 @@ import { UserAuth } from "../../context/AuthContext";
 import type { singleMovie } from "../../types";
 
 function Home() {
-  // prettier-ignore
-  // const { activeMovies, setActiveMovies, selectActiveSlideMovies, bookmarked, setBookmarked } = useSelectSlide();
-
   const [activeMovies, setActiveMovies] = useState<singleMovie[] | null>(null);
   const [bookmarked, setBookmarked] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { slidesAmount, fetchCountData } = useCountData();
-  const { currentlyTrending, fetchTrendingData } = useTrendingData();
+  const [slidesAmount, setSlidesAmount] = useState<string[] | null>(null);
+  const [countError, setCountError] = useState<string | null>(null);
+
+  // prettier-ignore
+  const [currentlyTrending, setCurrentlyTrending] = useState<singleMovie[] | null>(null);
+  const [trendingError, setTrendingError] = useState<string | null>(null);
+
   const { genres, fetchGenres } = useGenres();
   const [activeSlide, setActiveSlide] = useState<number>(1);
   const [activeGenre, setActiveGenre] = useState<string>("all");
@@ -55,6 +55,43 @@ function Home() {
     } catch (err) {
       console.error(err);
       setError("Failed to load slide movies");
+    }
+  };
+
+  const fetchCountData = async () => {
+    setCountError(null);
+
+    try {
+      const { count, error } = await supabase
+        .from("moviesData")
+        .select("*", { count: "exact", head: true });
+
+      if (error) {
+        throw error;
+      }
+
+      if (count !== null) {
+        const slidesCount = Array(Math.ceil(count / 12)).fill("");
+        setSlidesAmount(slidesCount);
+      }
+    } catch (err) {
+      console.error(err);
+      setCountError("Failed to load count data");
+    }
+  };
+
+  const fetchTrendingData = async () => {
+    setTrendingError(null);
+
+    try {
+      const { data, error } = await supabase.from("trendingMovies").select();
+
+      if (error) throw error;
+
+      setCurrentlyTrending(data);
+    } catch (err) {
+      console.error(err);
+      setTrendingError("Failed to load trending movies");
     }
   };
 
