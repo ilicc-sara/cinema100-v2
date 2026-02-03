@@ -3,7 +3,6 @@ import { supabase } from "../../supabase-client";
 import useCountData from "./customHooks/useCountData";
 import useTrendingData from "./customHooks/useTrendingData";
 import useGenres from "./customHooks/useGenres";
-import useSelectSlide from "./customHooks/useSelectSlide";
 import useFindGenre from "./customHooks/useFindGenre";
 import TrendingMovies from "./components/TrendingMovies";
 import Movies from "./components/Movies";
@@ -13,10 +12,16 @@ import SliderButton from "../../UI/SliderButton";
 import Button from "../../UI/Button";
 import { useNavigate } from "react-router";
 import { UserAuth } from "../../context/AuthContext";
+import type { singleMovie } from "../../types";
 
 function Home() {
   // prettier-ignore
-  const { activeMovies, setActiveMovies, selectActiveSlideMovies, bookmarked, setBookmarked } = useSelectSlide();
+  // const { activeMovies, setActiveMovies, selectActiveSlideMovies, bookmarked, setBookmarked } = useSelectSlide();
+
+  const [activeMovies, setActiveMovies] = useState<singleMovie[] | null>(null);
+  const [bookmarked, setBookmarked] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
   const { slidesAmount, fetchCountData } = useCountData();
   const { currentlyTrending, fetchTrendingData } = useTrendingData();
   const { genres, fetchGenres } = useGenres();
@@ -31,6 +36,27 @@ function Home() {
   const { setSession, setUserId, userId } = UserAuth();
 
   const navigate = useNavigate();
+
+  const selectActiveSlideMovies = async (
+    rangeIndex1: number,
+    rangeIndex2: number,
+  ) => {
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("moviesData")
+        .select()
+        .range(rangeIndex1, rangeIndex2);
+
+      if (error) throw error;
+
+      setActiveMovies(data);
+      setBookmarked(false);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load slide movies");
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("sb-yyocycmzxqjdvkwqlpzd-auth-token");
