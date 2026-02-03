@@ -2,12 +2,9 @@ import { Link } from "react-router";
 import type { MovieItemProps } from "../../../types";
 import { UserAuth } from "../../../context/AuthContext";
 import { supabase } from "../../../supabase-client";
-import useSelectSlide from "../customHooks/useSelectSlide";
 
 function MovieItem({ item, index, details }: MovieItemProps) {
   const { userId, bookmarkedMovies, setBookmarkedMovies } = UserAuth();
-  // prettier-ignore
-  // const { activeMovies, setActiveMovies, selectActiveSlideMovies, bookmarked, setBookmarked } = useSelectSlide();
 
   const checkIfMovieIsBookmarked = async (userID: string, movieID: string) => {
     try {
