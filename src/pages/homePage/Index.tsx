@@ -142,6 +142,8 @@ function Home() {
     setBookmarked(false);
   };
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////
+  // Controling slide index and movies range accordingly  ⬇️
   const setActiveSlideAndMovies = (index: number) => {
     setActiveSlide(index + 1);
     selectActiveSlideMovies(index * 12, (index + 1) * 12 - 1);
@@ -168,6 +170,7 @@ function Home() {
       } else return 1;
     });
   };
+  ////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
     <>
