@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase-client";
-// import useFindGenre from "./customHooks/useFindGenre";
 import TrendingMovies from "./components/TrendingMovies";
 import Movies from "./components/Movies";
 import "react-toastify/dist/ReactToastify.css";
@@ -53,18 +52,6 @@ function Home() {
     }
   };
 
-  const checkingTheCount = async () => {
-    try {
-      const { count } = await supabase
-        .from("moviesData")
-        .select("*", { count: "exact", head: true });
-
-      console.log(count);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const fetchCountData = async () => {
     try {
       const { count, error } = await supabase
@@ -105,6 +92,13 @@ function Home() {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    (selectActiveSlideMovies(0, 11),
+      fetchCountData(),
+      fetchTrendingData(),
+      fetchGenres());
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("sb-yyocycmzxqjdvkwqlpzd-auth-token");
