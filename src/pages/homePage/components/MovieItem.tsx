@@ -1,60 +1,7 @@
 import { Link } from "react-router";
 import type { MovieItemProps } from "../../../types";
-import { UserAuth } from "../../../context/AuthContext";
-import { supabase } from "../../../supabase-client";
 
 function MovieItem({ item, index, details }: MovieItemProps) {
-  const { userId, bookmarkedMovies, setBookmarkedMovies } = UserAuth();
-
-  const checkIfMovieIsBookmarked = async (userID: string, movieID: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("bookmarkedMovies")
-        .select("id")
-        .eq("movieID", movieID)
-        .eq("userID", userID)
-        .maybeSingle();
-
-      if (error) {
-        console.error(error);
-        return false;
-      }
-      return !!data;
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-  };
-  const bookmarkMovie = async (userID: string, movieID: string) => {
-    const isBookmarked = await checkIfMovieIsBookmarked(userID, movieID);
-    if (!isBookmarked) {
-      try {
-        const { data, error } = await supabase
-          .from("bookmarkedMovies")
-          .insert([{ userID: userID, movieID: movieID }])
-          .single();
-
-        console.log("data data", data);
-        if (error) {
-          console.error(error, "data can not be saved");
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
-      const { error } = await supabase
-        .from("bookmarkedMovies")
-        .delete()
-        .eq("userID", userID)
-        .eq("movieID", movieID);
-
-      if (error) {
-        console.error("Delete failed", error);
-        return;
-      }
-    }
-  };
-
   return (
     <article className="text-[#e8f0fe] flex flex-col gap-2 h-full">
       <div className="relative">
@@ -70,10 +17,7 @@ function MovieItem({ item, index, details }: MovieItemProps) {
             </button>
           </Link>
 
-          <button
-            onClick={() => bookmarkMovie(userId ? userId : "", item.imdbid)}
-            className="absolute top-[10px] right-[10px] z-20 text-[#141414] bg-[#e8f0fe80] hover:text-[#e8f0fe] hover:bg-[#14141480] transition-all duration-200 flex justify-center items-center gap-1 !p-2 rounded-full cursor-pointer"
-          >
+          <button className="absolute top-[10px] right-[10px] z-20 text-[#141414] bg-[#e8f0fe80] hover:text-[#e8f0fe] hover:bg-[#14141480] transition-all duration-200 flex justify-center items-center gap-1 !p-2 rounded-full cursor-pointer">
             <i className="bxr  bx-bookmark"></i>
           </button>
         </div>

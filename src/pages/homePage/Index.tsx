@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabase-client";
-import useFindGenre from "./customHooks/useFindGenre";
+// import useFindGenre from "./customHooks/useFindGenre";
 import TrendingMovies from "./components/TrendingMovies";
 import Movies from "./components/Movies";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,18 +15,13 @@ import type { Genres } from "../../types";
 function Home() {
   const [activeMovies, setActiveMovies] = useState<singleMovie[] | null>(null);
   const [bookmarked, setBookmarked] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const [slidesAmount, setSlidesAmount] = useState<string[] | null>(null);
-  const [countError, setCountError] = useState<string | null>(null);
 
   // prettier-ignore
   const [currentlyTrending, setCurrentlyTrending] = useState<singleMovie[] | null>(null);
-  const [trendingError, setTrendingError] = useState<string | null>(null);
 
-  // const { genres, fetchGenres } = useGenres();
   const [genres, setGenres] = useState<Genres[] | null>(null);
-  const [genresError, setGenresError] = useState<string | null>(null);
 
   const [activeSlide, setActiveSlide] = useState<number>(1);
   const [activeGenre, setActiveGenre] = useState<string>("all");
@@ -44,7 +39,6 @@ function Home() {
     rangeIndex1: number,
     rangeIndex2: number,
   ) => {
-    setError(null);
     try {
       const { data, error } = await supabase
         .from("moviesData")
@@ -56,13 +50,22 @@ function Home() {
       setActiveMovies(data);
     } catch (err) {
       console.error(err);
-      setError("Failed to load slide movies");
+    }
+  };
+
+  const checkingTheCount = async () => {
+    try {
+      const { count } = await supabase
+        .from("moviesData")
+        .select("*", { count: "exact", head: true });
+
+      console.log(count);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const fetchCountData = async () => {
-    setCountError(null);
-
     try {
       const { count, error } = await supabase
         .from("moviesData")
@@ -73,18 +76,15 @@ function Home() {
       }
 
       if (count !== null) {
-        const slidesCount = Array(Math.ceil(count / 12)).fill("");
-        setSlidesAmount(slidesCount);
+        const slidesArray = Array(Math.ceil(count / 12)).fill("");
+        setSlidesAmount(slidesArray);
       }
     } catch (err) {
       console.error(err);
-      setCountError("Failed to load count data");
     }
   };
 
   const fetchTrendingData = async () => {
-    setTrendingError(null);
-
     try {
       const { data, error } = await supabase.from("trendingMovies").select();
 
@@ -93,19 +93,16 @@ function Home() {
       setCurrentlyTrending(data);
     } catch (err) {
       console.error(err);
-      setTrendingError("Failed to load trending movies");
     }
   };
 
   const fetchGenres = async () => {
-    setGenresError(null);
     try {
       const { data, error } = await supabase.from("genres").select();
       if (error) throw error;
       setGenres(data);
     } catch (err) {
       console.error(err);
-      setGenresError("Failed to load genres");
     }
   };
 
@@ -125,29 +122,6 @@ function Home() {
       navigate("/login");
     }
   }, []);
-
-  // COUNTING MOVIES IN THE BASE AND FORMING SLIDES ACCORDINGLY, SELECTING TRENDING DATA AND SELECTING GENRES
-  useEffect(() => {
-    fetchCountData();
-    fetchTrendingData();
-    fetchGenres();
-  }, []);
-
-  // SELECTIGN ACTIVE MOVIES FROM ACTIVE SLIDE
-  useEffect(() => {
-    selectActiveSlideMovies((activeSlide - 1) * 12, activeSlide * 12 - 1);
-    setSearch("");
-  }, [activeSlide, selectActiveSlideMovies]);
-
-  // FINDING MOVIES ACCORDING TO SELECTED GENRE OR ELSE (if activated "all") RETURNING TO SLIDE 1
-  useEffect(() => {
-    if (activeGenre !== "all") {
-      useFindGenre(setLoading, activeGenre, setActiveMovies, setActiveSlide);
-    } else {
-      selectActiveSlideMovies((activeSlide - 1) * 12, activeSlide * 12 - 1);
-      setSearch("");
-    }
-  }, [activeGenre]);
 
   const handleSumbit = async (e: any) => {
     e.preventDefault();
@@ -172,38 +146,6 @@ function Home() {
     }
     setSearch("");
     setBookmarked(false);
-  };
-
-  const showBookmarkedMovies = async (userID: string) => {
-    let bookmarkedMoviesIds = [];
-    try {
-      const { data, error } = await supabase
-        .from("bookmarkedMovies")
-        .select()
-        .eq("userID", userID);
-
-      if (data) {
-        bookmarkedMoviesIds = data.map((movie) => movie.movieID);
-        console.log(data);
-      }
-      if (error) {
-        console.error(error, "Could not find bookmarked movies");
-      }
-
-      const { data: movies, error: moviesError } = await supabase
-        .from("moviesData")
-        .select("*")
-        .in("imdbid", bookmarkedMoviesIds);
-
-      setActiveMovies(movies);
-      setBookmarked(true);
-
-      if (moviesError) {
-        console.error(moviesError, "Could not load bookmarked movies");
-      }
-    } catch (error) {
-      console.error(error);
-    }
   };
 
   return (
@@ -255,7 +197,6 @@ function Home() {
             <i
               className={`bxr bxs-bookmark text-[24px]`}
               style={{ color: `${bookmarked ? "#fc4747" : "#bfbfbf"}` }}
-              onClick={() => showBookmarkedMovies(userId ? userId : "")}
             ></i>
             <i
               className={`bxr bxs-home text-[24px]`}
