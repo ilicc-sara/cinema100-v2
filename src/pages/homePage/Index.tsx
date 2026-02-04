@@ -142,6 +142,33 @@ function Home() {
     setBookmarked(false);
   };
 
+  const setActiveSlideAndMovies = (index: number) => {
+    setActiveSlide(index + 1);
+    selectActiveSlideMovies(index * 12, (index + 1) * 12 - 1);
+  };
+
+  const increaseActiveSlide = () => {
+    setActiveSlide((prev) => {
+      if (prev !== MAX_SLIDES) {
+        const next = prev + 1;
+        selectActiveSlideMovies((next - 1) * 12, next * 12 - 1);
+        return prev + 1;
+      } else {
+        return MAX_SLIDES;
+      }
+    });
+  };
+
+  const decreaseActiveSlide = () => {
+    setActiveSlide((prev) => {
+      if (prev !== 1) {
+        const next = prev - 1;
+        selectActiveSlideMovies((next - 1) * 12, next * 12 - 1);
+        return prev - 1;
+      } else return 1;
+    });
+  };
+
   return (
     <>
       <section className="!mb-10">
@@ -217,13 +244,7 @@ function Home() {
         <div className="flex !mx-auto w-[fit-content] gap-4 !my-10">
           <Button
             variation="arr-button"
-            handleClick={() =>
-              setActiveSlide((prev) => {
-                if (prev !== 1) {
-                  return prev - 1;
-                } else return 1;
-              })
-            }
+            handleClick={() => decreaseActiveSlide()}
           >
             <i className="bxrds  bx-arrow-left text-xl"></i>
           </Button>
@@ -233,21 +254,13 @@ function Home() {
                 <SliderButton
                   index={index}
                   activeSlide={activeSlide}
-                  handleClick={() => setActiveSlide(index + 1)}
+                  handleClick={() => setActiveSlideAndMovies(index)}
                 />
               ))}
           </div>
           <Button
             variation="arr-button"
-            handleClick={() =>
-              setActiveSlide((prev) => {
-                if (prev !== MAX_SLIDES) {
-                  return prev + 1;
-                } else {
-                  return MAX_SLIDES;
-                }
-              })
-            }
+            handleClick={() => increaseActiveSlide()}
           >
             <i className="bxrds  bx-arrow-right text-xl"></i>
           </Button>
