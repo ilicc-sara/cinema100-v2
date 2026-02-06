@@ -30,7 +30,7 @@ function Home() {
 
   const MAX_SLIDES = slidesAmount?.length;
 
-  const { setSession, setUserId, userId } = UserAuth();
+  const { setSession, setUserId } = UserAuth();
 
   const navigate = useNavigate();
 
@@ -93,6 +93,26 @@ function Home() {
     }
   };
 
+  const findGenreMovies = async (genre: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("moviesData")
+        .select()
+        .ilike("genre", `%${genre}%`)
+        .limit(12);
+
+      if (error) throw error;
+
+      setActiveMovies(data);
+      setActiveSlide(1);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     (selectActiveSlideMovies(0, 11),
       fetchCountData(),
@@ -116,6 +136,16 @@ function Home() {
       navigate("/login");
     }
   }, []);
+
+  useEffect(() => {
+    if (activeGenre === "all") {
+      selectActiveSlideMovies(0, 11);
+      setActiveSlide(1);
+      return;
+    }
+
+    findGenreMovies(activeGenre);
+  }, [activeGenre]);
 
   const handleSumbit = async (e: any) => {
     e.preventDefault();
