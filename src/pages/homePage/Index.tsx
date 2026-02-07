@@ -16,7 +16,6 @@ function Home() {
   const [bookmarked, setBookmarked] = useState<boolean>(false);
 
   const [slidesAmount, setSlidesAmount] = useState<string[] | null>(null);
-
   // prettier-ignore
   const [currentlyTrending, setCurrentlyTrending] = useState<singleMovie[] | null>(null);
 
@@ -114,10 +113,21 @@ function Home() {
   };
 
   useEffect(() => {
-    (selectActiveSlideMovies(0, 11),
-      fetchCountData(),
-      fetchTrendingData(),
-      fetchGenres());
+    const init = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          selectActiveSlideMovies(0, 11),
+          fetchCountData(),
+          fetchTrendingData(),
+          fetchGenres(),
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    init();
   }, []);
 
   useEffect(() => {
